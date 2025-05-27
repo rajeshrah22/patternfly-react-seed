@@ -7,6 +7,7 @@ import {
   MastheadLogo,
   MastheadMain,
   MastheadToggle,
+  MastheadContent,
   Nav,
   NavExpandable,
   NavItem,
@@ -25,6 +26,17 @@ interface IAppLayout {
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
+
+  const headerToolbar = (
+    <Toolbar id="multiple-sidebar-body-toolbar">
+      <ToolbarContent>
+        <ToolbarContent>
+          <ToolbarItem>header-tools</ToolbarItem>
+        </ToolbarContent>
+      </ToolbarContent>
+    </Toolbar>
+  );
+
   const masthead = (
     <Masthead>
       <MastheadMain>
@@ -83,6 +95,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </MastheadLogo>
         </MastheadBrand>
       </MastheadMain>
+      <MastheadContent>{This is where you would compose horizontal navigation.}</MastheadContent>
     </Masthead>
   );
 
