@@ -28,36 +28,24 @@ const routes: AppRouteConfig[] = [
   {
     element: <Dashboard />,
     exact: true,
-    label: 'Dashboard',
+    label: 'Review',
     path: '/',
     title: 'PatternFly Seed | Main Dashboard',
   },
   {
     element: <Support />,
     exact: true,
-    label: 'Support',
+    label: 'Write',
     path: '/support',
     title: 'PatternFly Seed | Support Page',
   },
   {
+    element: <GeneralSettings />,
+    exact: true,
     label: 'Settings',
-    routes: [
-      {
-        element: <GeneralSettings />,
-        exact: true,
-        label: 'General',
-        path: '/settings/general',
-        title: 'PatternFly Seed | General Settings',
-      },
-      {
-        element: <ProfileSettings />,
-        exact: true,
-        label: 'Profile',
-        path: '/settings/profile',
-        title: 'PatternFly Seed | Profile Settings',
-      },
-    ],
-  },
+    path: '/settings',
+    title: 'PatternFly Seed | General Settings',
+  }
 ];
 
 const flattenedRoutes: IAppRoute[] = routes.reduce(
