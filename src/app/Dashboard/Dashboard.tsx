@@ -6,6 +6,7 @@ import {
   Button,
   Tooltip,
   Checkbox,
+  TextInput,
   CodeBlock,
   CodeBlockAction,
   CodeBlockCode,
@@ -15,27 +16,6 @@ import { CodeEditor, Language } from '@patternfly/react-code-editor';
 import PlayIcon from '@patternfly/react-icons/dist/esm/icons/play-icon';
 
 const CodeEditorBasic: React.FunctionComponent = () => {
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
-  const [isLineNumbersVisible, setIsLineNumbersVisibile] = useState(true);
-  const [isReadOnly, setIsReadOnly] = useState(false);
-  const [isMinimapVisible, setIsMinimapVisible] = useState(false);
-
-  const toggleDarkTheme = (checked) => {
-    setIsDarkTheme(checked);
-  };
-
-  const toggleLineNumbers = (checked) => {
-    setIsLineNumbersVisible(checked);
-  };
-
-  const toggleReadOnly = (checked) => {
-    setIsReadonly(checked);
-  };
-
-  const toggleMinimap = (checked) => {
-    setIsMinimapVisible(checked);
-  };
-
   const onEditorDidMount = (editor, monaco) => {
     editor.layout();
     editor.focus();
@@ -46,47 +26,42 @@ const CodeEditorBasic: React.FunctionComponent = () => {
     console.log(value);
   };
 
+  const exampleString = `interfaces:
+  - name: eth0
+    type: ethernet
+    state: up
+    mac-address: "DE:AD:BE:EF:CA:FE" # Optional: Set a specific MAC address
+    mtu: 1500
+    ipv4:
+      enabled: true
+      address:
+        - ip: 192.168.1.10
+          prefix-length: 24
+      dhcp: false
+      dns:
+        server:
+          - 8.8.8.8
+          - 8.8.4.4
+        search:
+          - mydomain.local
+    ipv6:
+      enabled: true
+      address:
+        - ip: 2001:db8::10
+          prefix-length: 64
+      dhcp: false
+  `
+
   return (
     <>
-      <Checkbox
-        label="Dark theme"
-        isChecked={isDarkTheme}
-        onChange={(_event, checked) => toggleDarkTheme(checked)}
-        aria-label="dark theme checkbox"
-        id="toggle-theme"
-        name="toggle-theme"
-      />
-      <Checkbox
-        label="Line numbers"
-        isChecked={isLineNumbersVisible}
-        onChange={(_event, checked) => toggleLineNumbers(checked)}
-        aria-label="line numbers checkbox"
-        id="toggle-line-numbers"
-        name="toggle-line-numbers"
-      />
-      <Checkbox
-        label="Read only"
-        isChecked={isReadOnly}
-        onChange={(_event, checked) => toggleReadOnly(checked)}
-        aria-label="read only checkbox"
-        id="toggle-read-only"
-        name="toggle-read-only"
-      />
-      <Checkbox
-        label="Minimap"
-        isChecked={isMinimapVisible}
-        onChange={(_event, checked) => toggleMinimap(checked)}
-        aria-label="display minimap checkbox"
-        id="toggle-minimap"
-        name="toggle-minimap"
-      />
+      <Title headingLevel="h2" size="md">
+        Description
+      </Title>
+      <TextInput />
       <CodeEditor
-        isDarkTheme={isDarkTheme}
-        isLineNumbersVisible={isLineNumbersVisible}
-        isReadOnly={isReadOnly}
-        isMinimapVisible={isMinimapVisible}
+        isLineNumbersVisible={true}
         isLanguageLabelVisible
-        code="Some example content"
+        code={exampleString}
         onChange={onChange}
         language={Language.yaml}
         onEditorDidMount={onEditorDidMount}
@@ -98,11 +73,12 @@ const CodeEditorBasic: React.FunctionComponent = () => {
 
 const Dashboard: React.FunctionComponent = () => (
   <>
-    {console.log("hello")}
-    <PageSection hasBodyWrapper={false}>
-      <Title headingLevel="h1" size="lg">Dashboard Page Title!</Title>
+    <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
+      <Title headingLevel="h1" size="lg">Review</Title>
     </PageSection>
+    <PageSection hasBodyWrapper={false}>
     <CodeEditorBasic />
+    </PageSection>
   </>
 )
 
