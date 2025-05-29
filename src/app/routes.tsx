@@ -45,7 +45,7 @@ const routes: AppRouteConfig[] = [
     label: 'Settings',
     path: '/settings',
     title: 'PatternFly Seed | General Settings',
-  }
+  },
 ];
 
 const flattenedRoutes: IAppRoute[] = routes.reduce(
