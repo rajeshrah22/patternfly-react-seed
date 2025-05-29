@@ -62,7 +62,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   const headerToolbar = (
-    <Toolbar id="multiple-sidebar-body-toolbar">
+    <Toolbar>
       <ToolbarContent>
         <ToolbarContent>
           <ToolbarItem>{Navigation}</ToolbarItem>
@@ -124,15 +124,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       <MastheadContent>{headerToolbar}</MastheadContent>
     </Masthead>
   );
-
-
-  /*
-  const Sidebar = (
-    <PageSidebar>
-      <PageSidebarBody>{Navigation}</PageSidebarBody>
-    </PageSidebar>
-  );
-  */
 
   const pageId = 'primary-app-container';
 
