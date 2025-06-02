@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Fragment, useState } from 'react';
+import { Fragment, useState } from 'react';
 import {
   PageSection,
   Title,
@@ -49,7 +49,7 @@ const CodeEditorBasic: React.FunctionComponent = () => {
 
   const customControl = (
     <CodeEditorControl
-      icon={<CheckCircleIcon style={{ color: t_global_icon_color_status_success_default.var }}/>}
+      icon={<CheckCircleIcon style={{ color: t_global_icon_color_status_success_default.var }} />}
       aria-label="Verify schema"
       tooltipProps={{ content: 'Validate schema' }}
     />
@@ -102,20 +102,20 @@ const CodeEditorBasic: React.FunctionComponent = () => {
 }
 
 const reviewButtons = (
-    <ActionList>
-      <ActionListGroup>
-        <ActionListItem>
-          <Button variant="primary" id="single-group-next-button">
-            Yes
-          </Button>
-        </ActionListItem>
-        <ActionListItem>
-          <Button variant="secondary" id="single-group-back-button">
-            No
-          </Button>
-        </ActionListItem>
-      </ActionListGroup>
-    </ActionList>
+  <ActionList>
+    <ActionListGroup>
+      <ActionListItem>
+        <Button variant="primary" id="single-group-next-button">
+          Yes
+        </Button>
+      </ActionListItem>
+      <ActionListItem>
+        <Button variant="secondary" id="single-group-back-button">
+          No
+        </Button>
+      </ActionListItem>
+    </ActionListGroup>
+  </ActionList>
 );
 
 const Dashboard: React.FunctionComponent = () => (
@@ -124,7 +124,7 @@ const Dashboard: React.FunctionComponent = () => (
       <Title headingLevel="h1" size="lg">Review</Title>
     </PageSection>
     <PageSection hasBodyWrapper={false}>
-    <CodeEditorBasic />
+      <CodeEditorBasic />
     </PageSection>
     <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
       {reviewButtons}
