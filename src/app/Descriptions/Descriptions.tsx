@@ -3,16 +3,15 @@ import { CubesIcon } from '@patternfly/react-icons';
 import {
   Title,
   TextInput,
-  Fragment,
   PageSection,
 } from '@patternfly/react-core';
 
 // eslint-disable-next-line prefer-const
-let Support: React.FunctionComponent<ISupportProps> = () => (
-  <>
+let DescriptionsPage: React.FunctionComponent = () => (
+  <React.Fragment>
     <PageSection hasBodyWrapper={false}>
       <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
-        <Title headingLevel="h1" size="lg">Write</Title>
+        <Title headingLevel="h1" size="lg">Contribute descriptions for nmstate schemas</Title>
       </PageSection>
     </PageSection>
     <PageSection>
@@ -21,7 +20,7 @@ let Support: React.FunctionComponent<ISupportProps> = () => (
       </Title>
       <TextInput />
     </PageSection>
-  </>
+  </React.Fragment>
 );
 
-export { Support };
+export { DescriptionsPage };

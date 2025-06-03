@@ -106,19 +106,24 @@ const reviewButtons = (
     <ActionListGroup>
       <ActionListItem>
         <Button variant="primary" id="single-group-next-button">
-          Yes
+          Accept
         </Button>
       </ActionListItem>
       <ActionListItem>
         <Button variant="secondary" id="single-group-back-button">
-          No
+          Reject
+        </Button>
+      </ActionListItem>
+      <ActionListItem>
+        <Button variant="secondary" id="single-group-back-button">
+          Need further review
         </Button>
       </ActionListItem>
     </ActionListGroup>
   </ActionList>
 );
 
-const Dashboard: React.FunctionComponent = () => (
+const Review: React.FunctionComponent = () => (
   <>
     <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
       <Title headingLevel="h1" size="lg">Review</Title>
@@ -132,4 +137,4 @@ const Dashboard: React.FunctionComponent = () => (
   </>
 )
 
-export { Dashboard };
+export { Review };

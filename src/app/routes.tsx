@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { Dashboard } from '@app/Dashboard/Dashboard';
-import { Support } from '@app/Support/Support';
+import { Review } from '@app/Review/Review';
+import { DescriptionsPage } from '@app/Descriptions/Descriptions';
+import { SchemasPage } from '@app/Schemas/Schemas';
 import { GeneralSettings } from '@app/Settings/General/GeneralSettings';
 import { ProfileSettings } from '@app/Settings/Profile/ProfileSettings';
 import { NotFound } from '@app/NotFound/NotFound';
@@ -26,17 +27,24 @@ export type AppRouteConfig = IAppRoute | IAppRouteGroup;
 
 const routes: AppRouteConfig[] = [
   {
-    element: <Dashboard />,
+    element: <Review />,
     exact: true,
     label: 'Review',
     path: '/',
-    title: 'PatternFly Seed | Main Dashboard',
+    title: 'PatternFly Seed | Review Page',
   },
   {
-    element: <Support />,
+    element: <DescriptionsPage />,
     exact: true,
-    label: 'Write',
-    path: '/support',
+    label: 'Write descriptions',
+    path: '/descriptions',
+    title: 'PatternFly Seed | Support Page',
+  },
+  {
+    element: <SchemasPage />,
+    exact: true,
+    label: 'Write schemas',
+    path: '/schemas',
     title: 'PatternFly Seed | Support Page',
   },
   {
