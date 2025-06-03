@@ -10,7 +10,7 @@ import {
 let DescriptionsPage: React.FunctionComponent = () => (
   <React.Fragment>
     <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
-      <Title headingLevel="h1" size="lg">Contribute descriptions for nmstate schemas</Title>
+      <Title headingLevel="h1" size="lg">Contribute descriptions or LLM prompts for nmstate schemas</Title>
     </PageSection>
     <PageSection>
       <Title headingLevel="h2" size="md">
