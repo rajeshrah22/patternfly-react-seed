@@ -110,7 +110,7 @@ const reviewButtons = (
 );
 
 const SchemasPage: React.FunctionComponent = () => (
-  <>
+  <React.Fragment>
     <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
       <Title headingLevel="h1" size="lg">Contribute nmstate schemas, validate before saving</Title>
     </PageSection>
@@ -120,7 +120,7 @@ const SchemasPage: React.FunctionComponent = () => (
     <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
       {reviewButtons}
     </PageSection>
-  </>
+  </React.Fragment>
 )
 
 export { SchemasPage };

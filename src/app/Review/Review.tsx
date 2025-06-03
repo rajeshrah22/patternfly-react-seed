@@ -95,6 +95,7 @@ const CodeEditorBasic: React.FunctionComponent = () => {
         customControls={customControl}
         language={Language.yaml}
         onEditorDidMount={onEditorDidMount}
+        isReadOnly
         height="400px"
       />
     </>
