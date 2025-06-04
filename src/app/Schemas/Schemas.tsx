@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useCallback } from 'react';
 import {
   PageSection,
   Title,
@@ -7,120 +7,166 @@ import {
   ActionListGroup,
   ActionListItem,
   Button,
-  Tooltip,
-  TextInput,
 } from '@patternfly/react-core';
 import { CodeEditor, Language, CodeEditorControl } from '@patternfly/react-code-editor';
-import PlayIcon from '@patternfly/react-icons/dist/esm/icons/play-icon';
 import CheckCircleIcon from '@patternfly/react-icons/dist/esm/icons/check-circle-icon';
 import t_global_icon_color_status_success_default from '@patternfly/react-tokens/dist/esm/t_global_icon_color_status_success_default';
+import t_global_icon_color_status_warning_default from '@patternfly/react-tokens/dist/esm/t_global_icon_color_status_warning_default';
+import t_global_icon_color_status_danger_default from '@patternfly/react-tokens/dist/esm/t_global_icon_color_status_danger_default';
+import { validateSchema } from 'src/api/api';
 
-/*
- * So what kind of state do we need right now?
- * We need:
- * Content of the descirption field.
- * Content of the YAML schema.
- * functions to execute when yes/no is clicked.
- */
+type SchemaValidity = 'VALID' | 'INVALID' | 'NEUTRAL' | 'LOADING'
 
-/* More things to display:
- * Errors in validation.
- *
- * Some tooltips to talk about what each component/button does
- *   when you hover over them.
- *
- * Alerts for when things are done success or failiure.
- */
+interface CodeEditorBasicProps {
+  validity: SchemaValidity;
+  validateCallback: (schema: string) => void;
+  updateCurrentSchema: (schema: string) => void;
+}
 
-/*  Other state:
- *  is the code valid? Add a validate button.
- */
-
-const CodeEditorBasic: React.FunctionComponent = () => {
+const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ validity, validateCallback, updateCurrentSchema }: CodeEditorBasicProps) => {
   const onEditorDidMount = (editor, monaco) => {
     editor.layout();
     editor.focus();
     monaco.editor.getModels()[0].updateOptions({ tabSize: 5 });
   };
 
-  const onChange = (value) => {
-    console.log(value);
+  const onCircleCheckClick = (code: string, event: any) => {
+    validateCallback(code);
+    console.log(code);
+  }
+
+  const ColoredCustomControl: React.FunctionComponent = () => {
+    switch (validity) {
+      case 'VALID':
+        return <CheckCircleIcon style={{ color: t_global_icon_color_status_success_default.var }} />
+      case 'INVALID':
+        return <CheckCircleIcon style={{ color: t_global_icon_color_status_danger_default.var }} />
+      case 'NEUTRAL':
+        return <CheckCircleIcon />
+      case 'LOADING':
+        return <CheckCircleIcon style={{ color: t_global_icon_color_status_warning_default.var }} />
+    }
   };
 
   const customControl = (
     <CodeEditorControl
-      icon={<CheckCircleIcon style={{ color: t_global_icon_color_status_success_default.var }} />}
+      icon={<ColoredCustomControl />}
       aria-label="Verify schema"
       tooltipProps={{ content: 'Validate schema' }}
+      onClick={onCircleCheckClick}
     />
   );
 
-  const exampleString = `interfaces:
-  - name: eth0
-    type: ethernet
-    state: up
-    mac-address: "DE:AD:BE:EF:CA:FE" # Optional: Set a specific MAC address
-    mtu: 1500
-    ipv4:
-      enabled: true
-      address:
-        - ip: 192.168.1.10
-          prefix-length: 24
-      dhcp: false
-      dns:
-        server:
-          - 8.8.8.8
-          - 8.8.4.4
-        search:
-          - mydomain.local
-    ipv6:
-      enabled: true
-      address:
-        - ip: 2001:db8::10
-          prefix-length: 64
-      dhcp: false
-  `
+  const onChange = (value: string) => {
+    updateCurrentSchema(value);
+  }
+
+  const exampleString = `# --- Example NMState Configuration ---
+  #
+  # interfaces:
+  #   - name: eth0
+  #     type: ethernet
+  #     description: "Primary interface with static IP"
+  #     state: up
+  #     mtu: 1500
+  #     ipv4:
+  #       enabled: true
+  #       address:
+  #         - ip: 192.168.1.100
+  #           prefix-length: 24
+  #       dhcp: false
+  #       gateway: 192.168.1.1
+  #   - name: eth1
+  #     type: ethernet
+  #     description: "Secondary interface with DHCP"
+  #     state: up
+  #     ipv4:
+  #       enabled: true
+  #       dhcp: true
+  #       auto-dns: true
+  #       auto-gateway: true
+  `;
 
   return (
-    <>
+    <Fragment>
       <CodeEditor
         isLineNumbersVisible={true}
         isLanguageLabelVisible
-        code={exampleString}
-        onChange={onChange}
         customControls={customControl}
+        code={exampleString}
         language={Language.yaml}
         onEditorDidMount={onEditorDidMount}
         height="400px"
       />
-    </>
+    </Fragment>
   );
 }
 
-const reviewButtons = (
-  <ActionList>
-    <ActionListGroup>
-      <ActionListItem>
-        <Button variant="primary" id="single-group-next-button">
-          Validate
-        </Button>
-      </ActionListItem>
-    </ActionListGroup>
-  </ActionList>
-);
 
-const SchemasPage: React.FunctionComponent = () => (
-  <React.Fragment>
-    <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
-      <Title headingLevel="h1" size="lg">Contribute nmstate schemas, validate before saving</Title>
-    </PageSection>
-    <PageSection hasBodyWrapper={false}>
-      <CodeEditorBasic />
-    </PageSection>
-    <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
-      {reviewButtons}
-    </PageSection>
-  </React.Fragment>
-)
+const SchemasPage: React.FunctionComponent = () => {
+  const [validity, setValidity] = useState<SchemaValidity>('NEUTRAL');
 
+  let currentSchema = "";
+  let updateCurrentSchema = (schema: string) => {
+    currentSchema = schema;
+  }
+
+  const valdiateSchemaCallback = useCallback(async (schema: string) => {
+    setValidity('LOADING');
+    try {
+      let response = await validateSchema(schema);
+      if (response) {
+        setValidity('VALID');
+      } else {
+        setValidity('INVALID');
+      }
+    } catch (err) {
+      setValidity('INVALID');
+    }
+  }, []);
+
+  const onValidateButtonClick = (event: any) => {
+    valdiateSchemaCallback(currentSchema);
+  }
+
+  const reviewButtons = (
+    <ActionList>
+      <ActionListGroup>
+        <ActionListItem>
+          <Button variant="primary" id="single-group-next-button">
+            Submit
+          </Button>
+        </ActionListItem>
+        <ActionListItem>
+          <Button
+            variant="secondary"
+            id="single-group-next-button"
+            onClick={onValidateButtonClick}
+          >
+            Validate
+          </Button>
+        </ActionListItem>
+      </ActionListGroup>
+    </ActionList>
+  );
+
+  return (
+    <Fragment>
+      <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
+        <Title headingLevel="h1" size="lg">Contribute nmstate schemas, validate before saving</Title>
+      </PageSection>
+      <PageSection hasBodyWrapper={false}>
+        <CodeEditorBasic
+          validity={validity}
+          validateCallback={valdiateSchemaCallback}
+          updateCurrentSchema={updateCurrentSchema}
+        />
+      </PageSection>
+      <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
+        {reviewButtons}
+      </PageSection>
+    </Fragment>
+  )
+
+}
 export { SchemasPage };
