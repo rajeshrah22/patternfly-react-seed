@@ -1,19 +1,19 @@
 import * as React from 'react';
-import { Fragment, useState, useCallback } from 'react';
+import { Fragment, useState, useCallback, useRef } from 'react';
 import {
   PageSection,
   Title,
   ActionList,
   ActionListGroup,
   ActionListItem,
+  Alert,
   Button,
 } from '@patternfly/react-core';
 import { CodeEditor, Language, CodeEditorControl } from '@patternfly/react-code-editor';
 import CheckCircleIcon from '@patternfly/react-icons/dist/esm/icons/check-circle-icon';
 import t_global_icon_color_status_success_default from '@patternfly/react-tokens/dist/esm/t_global_icon_color_status_success_default';
 import t_global_icon_color_status_warning_default from '@patternfly/react-tokens/dist/esm/t_global_icon_color_status_warning_default';
-import t_global_icon_color_status_danger_default from '@patternfly/react-tokens/dist/esm/t_global_icon_color_status_danger_default';
-import { validateSchema } from 'src/api/api';
+import { sendSchemaContribution, validateSchema } from 'src/api/api';
 
 type SchemaValidity = 'VALID' | 'INVALID' | 'NEUTRAL' | 'LOADING'
 
@@ -40,11 +40,11 @@ const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ validi
       case 'VALID':
         return <CheckCircleIcon style={{ color: t_global_icon_color_status_success_default.var }} />
       case 'INVALID':
-        return <CheckCircleIcon style={{ color: t_global_icon_color_status_danger_default.var }} />
+        return <CheckCircleIcon style={{ color: t_global_icon_color_status_warning_default.var }} />
       case 'NEUTRAL':
         return <CheckCircleIcon />
       case 'LOADING':
-        return <CheckCircleIcon style={{ color: t_global_icon_color_status_warning_default.var }} />
+        return <CheckCircleIcon />
     }
   };
 
@@ -94,6 +94,7 @@ const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ validi
         isLanguageLabelVisible
         customControls={customControl}
         code={exampleString}
+        onChange={onChange}
         language={Language.yaml}
         onEditorDidMount={onEditorDidMount}
         height="400px"
@@ -106,13 +107,14 @@ const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ validi
 const SchemasPage: React.FunctionComponent = () => {
   const [validity, setValidity] = useState<SchemaValidity>('NEUTRAL');
 
-  let currentSchema = "";
+  let currentSchema = useRef("");
   let updateCurrentSchema = (schema: string) => {
-    currentSchema = schema;
+    currentSchema.current = schema;
   }
 
   const valdiateSchemaCallback = useCallback(async (schema: string) => {
     setValidity('LOADING');
+
     try {
       let response = await validateSchema(schema);
       if (response) {
@@ -126,14 +128,37 @@ const SchemasPage: React.FunctionComponent = () => {
   }, []);
 
   const onValidateButtonClick = (event: any) => {
-    valdiateSchemaCallback(currentSchema);
+    valdiateSchemaCallback(currentSchema.current);
+  }
+
+  const onSubmit = async (event: any) => {
+    setValidity('LOADING');
+
+    try {
+      let response = await validateSchema(currentSchema.current);
+      if (response) {
+        setValidity('VALID');
+      } else {
+        setValidity('INVALID');
+        return;
+      }
+    } catch (err) {
+      setValidity('INVALID');
+      return;
+    }
+
+    sendSchemaContribution({ nmstateYaml: currentSchema.current });
   }
 
   const reviewButtons = (
     <ActionList>
       <ActionListGroup>
         <ActionListItem>
-          <Button variant="primary" id="single-group-next-button">
+          <Button
+            variant="primary"
+            id="single-group-next-button"
+            onClick={onSubmit}
+          >
             Submit
           </Button>
         </ActionListItem>
@@ -164,6 +189,20 @@ const SchemasPage: React.FunctionComponent = () => {
       </PageSection>
       <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
         {reviewButtons}
+      </PageSection>
+      <PageSection>
+        {
+          validity == 'INVALID'
+            ?
+            <Alert
+              variant="warning"
+              title="Schema invalid, please edit before trying again"
+              ouiaId="WarningAlert"
+              style={{ maxWidth: "50%", margin: "auto", boxShadow: "none" }}
+            />
+            :
+            <></>
+        }
       </PageSection>
     </Fragment>
   )

@@ -35,6 +35,10 @@ interface ReviewRating {
   vote: VoteType
 }
 
+interface SchemaContribution {
+  nmstateYaml: string,
+}
+
 interface DescriptionStats {
   yesCount: number;
   noCount: number;
@@ -271,6 +275,7 @@ const nmstateYamlConfigurations = [
 
 let currIdx = 0;
 let ratingsArray: ReviewRating[] = [];
+let schemaContributions: SchemaContribution[] = [];
 
 function getRandomInteger(min: number, max: number): number {
   min = Math.ceil(min);
@@ -320,4 +325,12 @@ async function sendRating(reviewRating: ReviewRating) {
   return true;
 }
 
-export { validateSchema, getNextReview, sendRating, NmstateReviewData, ReviewRating }
+async function sendSchemaContribution(schemaContribution: SchemaContribution) {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  schemaContributions.push(schemaContribution);
+  /*debug*/ console.log(`${sendSchemaContribution.name}: ${schemaContribution.nmstateYaml}`);
+
+  return true;
+}
+
+export { validateSchema, getNextReview, sendRating, sendSchemaContribution, NmstateReviewData, ReviewRating }
