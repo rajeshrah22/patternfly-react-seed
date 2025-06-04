@@ -16,27 +16,6 @@ import CheckCircleIcon from '@patternfly/react-icons/dist/esm/icons/check-circle
 import t_global_icon_color_status_success_default from '@patternfly/react-tokens/dist/esm/t_global_icon_color_status_success_default';
 import { NmstateReviewData, ReviewRating, getNextReview, sendRating } from '../../api/api';
 
-/*
- * So what kind of state do we need right now?
- * We need:
- * Content of the descirption field.
- * Content of the YAML schema.
- * functions to execute when yes/no is clicked.
- */
-
-/* More things to display:
- * Errors in validation.
- *
- * Some tooltips to talk about what each component/button does
- *   when you hover over them.
- *
- * Alerts for when things are done success or failiure.
- */
-
-/*  Other state:
- *  is the code valid? Add a validate button.
- */
-
 interface CodeEditorBasicProps {
   nmstateReviewItem: NmstateReviewData;
   isLoading: boolean
