@@ -1,4 +1,9 @@
+type DescriptionsMap = Record<string, DescriptionStats>
+type YamlToDescriptionshashMap = Record<string, DescriptionsMap>;
+type VoteType = 'ACCEPT' | 'REJECT' | 'FURTHER_REVIEW';
+
 interface NmstateReviewData {
+  version: string
   /**
   * nmstate YAML schema.
   * If the user edited the YAML, this will be the new, edited version.
@@ -12,7 +17,6 @@ interface NmstateReviewData {
   * Vote 'yes' for good match between description and schema.
   * Vote 'no' for requiring further review.
   */
-  vote: 'yes' | 'no';
   /**
   * optional: Original description before any edits were made.
   * provide this if description is an edited version of the original.
@@ -24,6 +28,18 @@ interface NmstateReviewData {
   */
   userId?: string;
   reviewNotes?: string;
+}
+
+interface ReviewRating {
+  nmstateReviewData: NmstateReviewData;
+  vote: VoteType
+}
+
+interface DescriptionStats {
+  yesCount: number;
+  noCount: number;
+  need_review_count: number;
+  need_review: number;
 }
 
 const descriptionList = [
@@ -253,6 +269,9 @@ const nmstateYamlConfigurations = [
           tx: true`
 ];
 
+let currIdx = 0;
+let ratingsArray: ReviewRating[] = [];
+
 function getRandomInteger(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -260,19 +279,45 @@ function getRandomInteger(min: number, max: number): number {
 }
 
 // mock API for now
+/*
+ * Use libnmstate in the backend to verify state/schema.
+ */
 async function validateSchema(schema: string) {
   console.log("Simulating network delay 500ms...");
   await new Promise(resolve => setTimeout(resolve, 500));
   return getRandomInteger(0, 1) === 1;
 }
 
+/*
+ * Get the next "scheduled" review data for user to rate.
+ * Currently, the review data is cycled linearly.
+ * Maybe there is rooom for smarter scheduling.
+ */
 async function getNextReview(): Promise<NmstateReviewData> {
   await new Promise(resolve => setTimeout(resolve, 500));
-  return {
-    nmstateYaml: "dummy",
-    description: "string",
-    vote: 'yes',
+  let returnState = {
+    version: "v0",
+    nmstateYaml: nmstateYamlConfigurations[currIdx],
+    description: descriptionList[currIdx],
   }
+
+  currIdx = (currIdx + 1) % descriptionList.length;
+
+  /*debug*/ console.log(returnState);
+
+  return returnState;
 }
 
-export { validateSchema }
+/*
+ * The purpose of this function is to send the rating to the backend, and getting an OK response.
+ */
+async function sendRating(reviewRating: ReviewRating) {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // possible return an error if things did not go well.
+  ratingsArray.push(reviewRating);
+  /*debug*/ console.log(ratingsArray);
+
+  return true;
+}
+
+export { validateSchema, getNextReview, sendRating, NmstateReviewData, ReviewRating }

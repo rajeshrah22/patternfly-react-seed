@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useCallback, useEffect } from 'react';
 import {
   PageSection,
   Title,
@@ -14,6 +14,7 @@ import { CodeEditor, Language, CodeEditorControl } from '@patternfly/react-code-
 import PlayIcon from '@patternfly/react-icons/dist/esm/icons/play-icon';
 import CheckCircleIcon from '@patternfly/react-icons/dist/esm/icons/check-circle-icon';
 import t_global_icon_color_status_success_default from '@patternfly/react-tokens/dist/esm/t_global_icon_color_status_success_default';
+import { NmstateReviewData, ReviewRating, getNextReview, sendRating } from '../../api/api';
 
 /*
  * So what kind of state do we need right now?
@@ -36,65 +37,32 @@ import t_global_icon_color_status_success_default from '@patternfly/react-tokens
  *  is the code valid? Add a validate button.
  */
 
-const CodeEditorBasic: React.FunctionComponent = () => {
+interface CodeEditorBasicProps {
+  nmstateReviewItem: NmstateReviewData;
+  isLoading: boolean
+}
+
+const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ nmstateReviewItem, isLoading }: CodeEditorBasicProps) => {
   const onEditorDidMount = (editor, monaco) => {
     editor.layout();
     editor.focus();
     monaco.editor.getModels()[0].updateOptions({ tabSize: 5 });
   };
 
-  const onChange = (value) => {
-    console.log(value);
-  };
-
-  const customControl = (
-    <CodeEditorControl
-      icon={<CheckCircleIcon style={{ color: t_global_icon_color_status_success_default.var }} />}
-      aria-label="Verify schema"
-      tooltipProps={{ content: 'Validate schema' }}
-    />
-  );
-
-  const exampleString = `interfaces:
-  - name: eth0
-    type: ethernet
-    state: up
-    mac-address: "DE:AD:BE:EF:CA:FE" # Optional: Set a specific MAC address
-    mtu: 1500
-    ipv4:
-      enabled: true
-      address:
-        - ip: 192.168.1.10
-          prefix-length: 24
-      dhcp: false
-      dns:
-        server:
-          - 8.8.8.8
-          - 8.8.4.4
-        search:
-          - mydomain.local
-    ipv6:
-      enabled: true
-      address:
-        - ip: 2001:db8::10
-          prefix-length: 64
-      dhcp: false
-  `
+  const loadingText = "Loading ..."
 
   return (
     <>
       <Title headingLevel="h2" size="md">
         Description
       </Title>
-      <TextInput />
+      <TextInput value={isLoading ? loadingText : nmstateReviewItem.description} />
       <CodeEditor
         isLineNumbersVisible={true}
         isLanguageLabelVisible
-        code={exampleString}
-        onChange={onChange}
-        customControls={customControl}
         language={Language.yaml}
         onEditorDidMount={onEditorDidMount}
+        code={isLoading ? loadingText : nmstateReviewItem.nmstateYaml}
         isReadOnly
         height="400px"
       />
@@ -102,40 +70,95 @@ const CodeEditorBasic: React.FunctionComponent = () => {
   );
 }
 
-const reviewButtons = (
-  <ActionList>
-    <ActionListGroup>
-      <ActionListItem>
-        <Button variant="primary" id="single-group-next-button">
-          Accept
-        </Button>
-      </ActionListItem>
-      <ActionListItem>
-        <Button variant="secondary" id="single-group-back-button">
-          Reject
-        </Button>
-      </ActionListItem>
-      <ActionListItem>
-        <Button variant="secondary" id="single-group-back-button">
-          Need further review
-        </Button>
-      </ActionListItem>
-    </ActionListGroup>
-  </ActionList>
-);
 
-const Review: React.FunctionComponent = () => (
-  <>
-    <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
-      <Title headingLevel="h1" size="lg">Review</Title>
-    </PageSection>
-    <PageSection hasBodyWrapper={false}>
-      <CodeEditorBasic />
-    </PageSection>
-    <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
-      {reviewButtons}
-    </PageSection>
-  </>
-)
+const Review: React.FunctionComponent = () => {
+  const [currentReviewItem, setCurrentReviewItem] = useState<NmstateReviewData>({ version: "", nmstateYaml: "", description: "" });
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const fetchNext = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await getNextReview();
+      if (!response) {
+        console.log("No more items to review at the moment.");
+      }
+      setCurrentReviewItem(response);
+    } catch (err) {
+      console.error("Failed to fetch next review item:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNext();
+  }, [fetchNext])
+
+  const onAccept = async (event) => {
+    const response = await sendRating({ nmstateReviewData: currentReviewItem, vote: 'ACCEPT' });
+    fetchNext();
+  }
+
+  const onReject = async (event) => {
+    const response = await sendRating({ nmstateReviewData: currentReviewItem, vote: 'REJECT' });
+    fetchNext();
+  }
+
+  const onNeedFurtherReview = async (event) => {
+    const response = await sendRating({ nmstateReviewData: currentReviewItem, vote: 'FURTHER_REVIEW' });
+    fetchNext();
+  }
+
+  const reviewButtons = (
+    <ActionList>
+      <ActionListGroup>
+        <ActionListItem>
+          <Button
+            variant="primary"
+            id="single-group-next-button"
+            onClick={onAccept}
+          >
+            Accept
+          </Button>
+        </ActionListItem>
+        <ActionListItem>
+          <Button
+            variant="secondary"
+            id="single-group-back-button"
+            onClick={onReject}
+          >
+            Reject
+          </Button>
+        </ActionListItem>
+        <ActionListItem>
+          <Button
+            variant="secondary"
+            id="single-group-back-button"
+            onClick={onNeedFurtherReview}
+          >
+            Need further review
+          </Button>
+        </ActionListItem>
+      </ActionListGroup>
+    </ActionList>
+  );
+
+  return (
+    <Fragment>
+      <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
+        <Title headingLevel="h1" size="lg">Review</Title>
+      </PageSection>
+      <PageSection hasBodyWrapper={false}>
+        <CodeEditorBasic
+          nmstateReviewItem={currentReviewItem}
+          isLoading={isLoading}
+        />
+      </PageSection>
+      <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
+        {reviewButtons}
+      </PageSection>
+    </Fragment>
+  )
+}
 
 export { Review };
