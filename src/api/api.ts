@@ -75,30 +75,34 @@ const nmstateYamlConfigurations = [
     type: ethernet
     state: up
     ipv4:
-      enabled: true
       address:
         - ip: 192.168.1.100
           prefix-length: 24
+      enabled: true
       dhcp: false
-      gateway: 192.168.1.1`,
-
+routes:
+  config:
+    - destination: 0.0.0.0/0
+      next-hop-interface: eth1
+      next-hop-address: 192.168.1.1
+      table-id: 254`,
   `interfaces:
   - name: bond0
     type: bond
     state: up
     link-aggregation:
       mode: active-backup
-      miimon: 100
-    port:
-      - eth1
-      - eth2
+      options:
+        miimon: 100
+      port:
+        - eth1
+        - eth2
     ipv4:
       enabled: true
       address:
         - ip: 10.0.0.50
           prefix-length: 24
       dhcp: false`,
-
   `interfaces:
   - name: eth0.100
     type: vlan
@@ -219,14 +223,14 @@ const nmstateYamlConfigurations = [
       options:
         lacp_rate: fast
         xmit_hash_policy: layer2+3
-    port:
-      - eth4
-      - eth5`,
+      port:
+        - eth4
+        - eth5`,
 
-  `routes:
-  rules:
-    - ip-from: 192.168.20.0/24
-      table: 100`,
+  `route-rules:
+  config:
+  - ip-from: 192.168.20.0/24
+    route-table: 100`,
 
   `interfaces:
   - name: eth0
@@ -265,12 +269,11 @@ const nmstateYamlConfigurations = [
     state: up
     ethtool:
       feature:
-        tcp-segmentation-offload:
-          rx: true
-          tx: true
-        generic-segmentation-offload:
-          rx: true
-          tx: true`
+        tx-tcp-segmentation: true
+        rx-tcp-segmentation: true
+        tx-generic-segmentation: true
+        rx-generic-segmentation: true
+`
 ];
 
 let currIdx = 0;
