@@ -19,11 +19,13 @@ type SchemaValidity = 'VALID' | 'INVALID' | 'NEUTRAL' | 'LOADING'
 
 interface CodeEditorBasicProps {
   validity: SchemaValidity;
+  setValidity: React.Dispatch<React.SetStateAction<SchemaValidity>>;
   validateCallback: (schema: string) => void;
   updateCurrentSchema: (schema: string) => void;
+  code: string,
 }
 
-const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ validity, validateCallback, updateCurrentSchema }: CodeEditorBasicProps) => {
+const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ validity, setValidity, validateCallback, updateCurrentSchema, code }: CodeEditorBasicProps) => {
   const onEditorDidMount = (editor, monaco) => {
     editor.layout();
     editor.focus();
@@ -59,33 +61,12 @@ const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ validi
 
   const onChange = (value: string) => {
     updateCurrentSchema(value);
-  }
 
-  const exampleString = `# --- Example NMState Configuration ---
-  #
-  # interfaces:
-  #   - name: eth0
-  #     type: ethernet
-  #     description: "Primary interface with static IP"
-  #     state: up
-  #     mtu: 1500
-  #     ipv4:
-  #       enabled: true
-  #       address:
-  #         - ip: 192.168.1.100
-  #           prefix-length: 24
-  #       dhcp: false
-  #       gateway: 192.168.1.1
-  #   - name: eth1
-  #     type: ethernet
-  #     description: "Secondary interface with DHCP"
-  #     state: up
-  #     ipv4:
-  #       enabled: true
-  #       dhcp: true
-  #       auto-dns: true
-  #       auto-gateway: true
-  `;
+    /* When user makes changes after a valid submission on a empty text box */
+    if (validity == 'VALID' && code == "") {
+      setValidity('NEUTRAL');
+    }
+  }
 
   return (
     <Fragment>
@@ -93,7 +74,7 @@ const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ validi
         isLineNumbersVisible={true}
         isLanguageLabelVisible
         customControls={customControl}
-        code={exampleString}
+        code={code}
         onChange={onChange}
         language={Language.yaml}
         onEditorDidMount={onEditorDidMount}
@@ -148,6 +129,7 @@ const SchemasPage: React.FunctionComponent = () => {
     }
 
     sendSchemaContribution({ nmstateYaml: currentSchema.current });
+    updateCurrentSchema("");
   }
 
   const reviewButtons = (
@@ -183,8 +165,10 @@ const SchemasPage: React.FunctionComponent = () => {
       <PageSection hasBodyWrapper={false}>
         <CodeEditorBasic
           validity={validity}
+          setValidity={setValidity}
           validateCallback={valdiateSchemaCallback}
           updateCurrentSchema={updateCurrentSchema}
+          code={currentSchema.current}
         />
       </PageSection>
       <PageSection isWidthLimited isCenterAligned hasBodyWrapper={false}>
@@ -194,14 +178,24 @@ const SchemasPage: React.FunctionComponent = () => {
         {
           validity == 'INVALID'
             ?
-            <Alert
+            (<Alert
               variant="warning"
               title="Schema invalid, please edit before trying again"
               ouiaId="WarningAlert"
               style={{ maxWidth: "50%", margin: "auto", boxShadow: "none" }}
-            />
+            />)
             :
-            <></>
+            (validity == 'VALID'
+              ?
+              <Alert
+                variant="success"
+                title="Schema valid. Contribute your next schema."
+                ouiaId="SuccessAlert"
+                style={{ maxWidth: "50%", margin: "auto", boxShadow: "none" }}
+              />
+              :
+              <></>)
+
         }
       </PageSection>
     </Fragment>
