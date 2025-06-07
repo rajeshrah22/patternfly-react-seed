@@ -10,11 +10,8 @@ import {
   Tooltip,
   TextInput,
 } from '@patternfly/react-core';
-import { CodeEditor, Language, CodeEditorControl } from '@patternfly/react-code-editor';
-import PlayIcon from '@patternfly/react-icons/dist/esm/icons/play-icon';
-import CheckCircleIcon from '@patternfly/react-icons/dist/esm/icons/check-circle-icon';
-import t_global_icon_color_status_success_default from '@patternfly/react-tokens/dist/esm/t_global_icon_color_status_success_default';
-import { NmstateReviewData, ReviewRating, getNextReview, sendRating } from '../../api/api';
+import { CodeEditor, Language } from '@patternfly/react-code-editor';
+import { NmstateReviewData, getNextReview, sendRating } from '../../api/api';
 
 interface CodeEditorBasicProps {
   nmstateReviewItem: NmstateReviewData;
