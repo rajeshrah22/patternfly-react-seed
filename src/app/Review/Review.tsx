@@ -15,10 +15,11 @@ import { NmstateReviewData, getNextReview, sendRating } from '../../api/api';
 
 interface CodeEditorBasicProps {
   nmstateReviewItem: NmstateReviewData;
+  setNmstateReviewItem: React.Dispatch<React.SetStateAction<NmstateReviewData>>;
   isLoading: boolean
 }
 
-const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ nmstateReviewItem, isLoading }: CodeEditorBasicProps) => {
+const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ nmstateReviewItem, setNmstateReviewItem, isLoading }: CodeEditorBasicProps) => {
   const onEditorDidMount = (editor, monaco) => {
     editor.layout();
     editor.focus();
@@ -27,12 +28,22 @@ const CodeEditorBasic: React.FunctionComponent<CodeEditorBasicProps> = ({ nmstat
 
   const loadingText = "Loading ..."
 
+  const onDescriptionChange = (event, value) => {
+    setNmstateReviewItem({
+      ...nmstateReviewItem,
+      description: value
+    });
+  };
+
   return (
     <>
       <Title headingLevel="h2" size="md">
         Description
       </Title>
-      <TextInput value={isLoading ? loadingText : nmstateReviewItem.description} />
+      <TextInput
+        value={isLoading ? loadingText : nmstateReviewItem.description}
+        onChange={onDescriptionChange}
+      />
       <CodeEditor
         isLineNumbersVisible={true}
         isLanguageLabelVisible
@@ -127,6 +138,7 @@ const Review: React.FunctionComponent = () => {
       <PageSection hasBodyWrapper={false}>
         <CodeEditorBasic
           nmstateReviewItem={currentReviewItem}
+          setNmstateReviewItem={setCurrentReviewItem}
           isLoading={isLoading}
         />
       </PageSection>

@@ -307,6 +307,7 @@ async function getNextReview(): Promise<NmstateReviewData> {
     version: "v0",
     nmstateYaml: nmstateYamlConfigurations[currIdx],
     description: descriptionList[currIdx],
+    originalDescription: descriptionList[currIdx]
   }
 
   currIdx = (currIdx + 1) % descriptionList.length;
